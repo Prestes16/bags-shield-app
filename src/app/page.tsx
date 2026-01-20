@@ -1,5 +1,5 @@
-import StartScreen from "@/components/screens/StartScreen";
+import { redirect } from "next/navigation";
 
-export default function StartPage() {
-  return <StartScreen />;
+export default function Page() {
+  redirect("/progresso");
 }

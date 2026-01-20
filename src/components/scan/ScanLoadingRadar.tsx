@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const steps = [
@@ -18,12 +18,11 @@ function isBase58Mint(v: string) {
   return /^[1-9A-HJ-NP-Za-km-z]+$/.test(s);
 }
 
-export function ScanLoadingRadar() {
+export function ScanLoadingRadar({ mint }: { mint: string }) {
   const router = useRouter();
-  const sp = useSearchParams();
-  const mint = (sp.get("mint") || "").trim();
+  const mintTrimmed = (mint || "").trim();
 
-  const valid = useMemo(() => isBase58Mint(mint), [mint]);
+  const valid = useMemo(() => isBase58Mint(mintTrimmed), [mintTrimmed]);
   const [i, setI] = useState(0);
 
   useEffect(() => {
@@ -35,10 +34,10 @@ export function ScanLoadingRadar() {
   useEffect(() => {
     if (!valid) return;
     if (i === steps.length - 1) {
-      const t = setTimeout(() => router.push(`/scan/result/${mint}`), 500);
+      const t = setTimeout(() => router.push(`/scan/result/${mintTrimmed}`), 500);
       return () => clearTimeout(t);
     }
-  }, [i, valid, mint, router]);
+  }, [i, valid, mintTrimmed, router]);
 
   if (!valid) {
     return (
@@ -66,7 +65,7 @@ export function ScanLoadingRadar() {
 
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-semibold">Scanning…</h2>
-          <p className="mt-1 text-sm text-muted-foreground truncate">{mint}</p>
+          <p className="mt-1 text-sm text-muted-foreground truncate">{mintTrimmed}</p>
 
           <div className="mt-3 h-2 w-full rounded-full bg-white/10">
             <div className="h-2 rounded-full bg-primary/70" style={{ width: `${pct}%` }} />

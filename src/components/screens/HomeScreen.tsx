@@ -5,40 +5,39 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { connectWallet } from "@/lib/wallet";
-import { connectWallet } from "@/lib/wallet";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
 
-  // Botão Search: navegar para /search (que redireciona para /scan)
+  // BotÃ£o Search: navegar para /search (que redireciona para /scan)
   const handleSearch = () => {
     router.push("/search"); // Redireciona para /scan
   };
 
-  // Botão Connect Wallet: tentar conectar wallet real
+  // BotÃ£o Connect Wallet: tentar conectar wallet real
   const handleConnectWallet = async () => {
     setWalletError(null);
     const result = await connectWallet();
     
     if (result.ok) {
       setIsWalletConnected(true);
-      // Após conectar, redirecionar para o Dashboard
+      // ApÃ³s conectar, redirecionar para o Dashboard
       router.push("/dashboard");
     } else {
       setWalletError(result.error || "Falha ao conectar wallet.");
-      // Se não tiver wallet, ainda permite navegar (modo demo)
-      // ou mostra erro para o usuário
+      // Se nÃ£o tiver wallet, ainda permite navegar (modo demo)
+      // ou mostra erro para o usuÃ¡rio
     }
   };
 
-  // Botão Quick Scan: levar diretamente para página de input de Mint Address
+  // BotÃ£o Quick Scan: levar diretamente para pÃ¡gina de input de Mint Address
   const handleQuickScan = () => {
-    router.push("/scan"); // Tela 7/8: Scan input para iniciar análise
+    router.push("/scan"); // Tela 7/8: Scan input para iniciar anÃ¡lise
   };
 
-  // Navegação do Bottom Nav
+  // NavegaÃ§Ã£o do Bottom Nav
   const handleBottomNavSearch = () => {
     router.push("/search"); // Redireciona para /scan
   };
@@ -67,7 +66,7 @@ export default function HomeScreen() {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";
                   if (target.parentElement) {
-                    target.parentElement.innerHTML = "🛡️";
+                    target.parentElement.innerHTML = "ðŸ›¡ï¸";
                   }
                 }}
               />
@@ -78,7 +77,7 @@ export default function HomeScreen() {
             </div>
           </div>
 
-          {/* Botão Search */}
+          {/* BotÃ£o Search */}
           <Button
             onClick={handleSearch}
             variant="outline"
@@ -116,7 +115,7 @@ export default function HomeScreen() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-          {/* Botão Connect Wallet */}
+          {/* BotÃ£o Connect Wallet */}
           {walletError && (
             <div className="w-full text-sm text-red-400 text-center mb-2">
               {walletError}
@@ -164,7 +163,7 @@ export default function HomeScreen() {
             )}
           </Button>
 
-          {/* Botão Quick Scan */}
+          {/* BotÃ£o Quick Scan */}
           <Button
             onClick={handleQuickScan}
             variant="outline"
@@ -231,7 +230,7 @@ export default function HomeScreen() {
       <nav className="border-t border-white/10 bg-background sticky bottom-0">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-around">
-            {/* Ícone Lupa -> /search */}
+            {/* Ãcone Lupa -> /search */}
             <button
               onClick={handleBottomNavSearch}
               className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
@@ -253,7 +252,7 @@ export default function HomeScreen() {
               <span className="text-xs text-slate-400">Search</span>
             </button>
 
-            {/* Ícone Relógio -> /history */}
+            {/* Ãcone RelÃ³gio -> /history */}
             <button
               onClick={handleBottomNavHistory}
               className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
@@ -275,7 +274,7 @@ export default function HomeScreen() {
               <span className="text-xs text-slate-400">History</span>
             </button>
 
-            {/* Ícone Engrenagem -> /settings */}
+            {/* Ãcone Engrenagem -> /settings */}
             <button
               onClick={handleBottomNavSettings}
               className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
