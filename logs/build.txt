@@ -1,0 +1,44 @@
+
+> bags-shield-app@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.0
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/18) ...
+   Generating static pages (4/18) 
+   Generating static pages (8/18) 
+   Generating static pages (13/18) 
+ ✓ Generating static pages (18/18)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.16 kB        93.3 kB
+├ ○ /_not-found                          871 B          87.7 kB
+├ ○ /alerts                              1.15 kB         103 kB
+├ ○ /apply                               1.15 kB         103 kB
+├ ○ /dashboard                           1.16 kB         103 kB
+├ ○ /history                             1.16 kB         103 kB
+├ ○ /home                                4.02 kB         104 kB
+├ ○ /scan                                3.19 kB         105 kB
+├ ○ /scan/loading                        2.01 kB         104 kB
+├ ○ /scan/result                         141 B            87 kB
+├ ƒ /scan/result/[mint]                  5.14 kB         107 kB
+├ ○ /search                              141 B            87 kB
+├ ○ /settings                            3.56 kB         106 kB
+├ ○ /simulate                            3.26 kB         105 kB
+├ ○ /simulate/result                     1.15 kB         103 kB
+└ ○ /watchlist                           4.16 kB         106 kB
++ First Load JS shared by all            86.9 kB
+  ├ chunks/23-c588bd2d905b83c4.js        31.3 kB
+  ├ chunks/fd9d1056-3509df4245d4b3cd.js  53.6 kB
+  └ other shared chunks (total)          1.89 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
