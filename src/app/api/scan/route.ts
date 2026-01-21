@@ -1,60 +1,82 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
-const UPSTREAM = (process.env.SHIELD_API_BASE || "").replace(/\/+$/, "");
-const NO_STORE = { "cache-control": "no-store" };
-
-function json(status: number, payload: any) {
-  return NextResponse.json(payload, { status, headers: NO_STORE });
+function mkRequestId() {
+  try { return crypto.randomUUID(); } catch { return `${Date.now()}-${Math.random().toString(16).slice(2)}`; }
 }
 
-export async function POST(req: NextRequest) {
-  if (!UPSTREAM) return json(500, { success: false, error: "SHIELD_API_BASE não configurado" });
+function withHeaders(res: NextResponse, requestId: string) {
+  res.headers.set("Cache-Control", "no-store");
+  res.headers.set("X-Request-Id", requestId);
+  // CORS (não afeta irm/curl, mas ajuda demo pública)
+  res.headers.set("Access-Control-Allow-Origin", "*");
+  res.headers.set("Access-Control-Allow-Methods", "POST,OPTIONS");
+  res.headers.set("Access-Control-Allow-Headers", "Content-Type, X-Request-Id");
+  return res;
+}
 
-  let body: any = null;
+function json(status: number, body: any, requestId: string) {
+  return withHeaders(NextResponse.json(body, { status }), requestId);
+}
+
+function validateMint(mint: string) {
+  const issues: Array<{ path: string; message: string }> = [];
+  const m = (mint || "").trim();
+
+  if (!m) issues.push({ path: "mint", message: "missing" });
+  // base58 (sem 0,O,I,l) e tamanho típico solana (32–44)
+  if (m && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(m)) {
+    issues.push({ path: "mint", message: "invalid base58 (expected 32–44 chars)" });
+  }
+  return { ok: issues.length === 0, mint: m, issues };
+}
+
+export function OPTIONS() {
+  const requestId = mkRequestId();
+  return withHeaders(new NextResponse(null, { status: 204 }), requestId);
+}
+
+export async function POST(req: Request) {
+  const requestId = mkRequestId();
+
+  let raw = "";
   try {
-    body = await req.json();
+    raw = await req.text();
   } catch {
-    return json(400, { success: false, error: "JSON inválido" });
+    return json(400, { success: false, error: "Unable to read request body", meta: { requestId } }, requestId);
   }
 
-  const mint = typeof body?.mint === "string" ? body.mint.trim() : "";
-  if (!mint) return json(400, { success: false, error: "mint é obrigatório" });
+  if (!raw || !raw.trim()) {
+    return json(400, { success: false, error: "Empty JSON body", issues: [{ path: "", message: "body required" }], meta: { requestId } }, requestId);
+  }
 
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 15_000);
-
+  let body: any;
   try {
-    const r = await fetch(`${UPSTREAM}/api/scan`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "accept": "application/json",
-      },
-      body: JSON.stringify({ ...body, mint }),
-      cache: "no-store",
-      signal: ac.signal,
-    });
-
-    const ct = r.headers.get("content-type") || "";
-    const text = await r.text();
-
-    // tenta manter o JSON do upstream como está
-    if (ct.includes("application/json")) {
-      try {
-        return json(r.status, JSON.parse(text));
-      } catch {
-        return new NextResponse(text, { status: r.status, headers: { ...NO_STORE, "content-type": ct } });
-      }
-    }
-
-    return new NextResponse(text, { status: r.status, headers: { ...NO_STORE, "content-type": ct || "text/plain" } });
-  } catch (e: any) {
-    const msg = e?.name === "AbortError" ? "timeout no upstream" : "falha ao chamar upstream";
-    return json(502, { success: false, error: msg });
-  } finally {
-    clearTimeout(timer);
+    body = JSON.parse(raw);
+  } catch {
+    return json(400, { success: false, error: "Invalid JSON body", meta: { requestId } }, requestId);
   }
+
+  const { ok, mint, issues } = validateMint(body?.mint);
+  if (!ok) {
+    return json(400, { success: false, error: "Invalid request", issues, meta: { requestId } }, requestId);
+  }
+
+  // Stub realista (por enquanto). Depois trocamos por proxy pro motor v0.
+  return json(200, {
+    success: true,
+    response: {
+      mint,
+      shieldScore: 80,
+      grade: "B",
+      badges: [
+        { id: "authorities", label: "Authorities", level: "ok" },
+        { id: "liquidity", label: "Liquidity", level: "attention" },
+        { id: "trading", label: "Trading", level: "ok" }
+      ],
+      summary: "Stub scan OK (swap to real engine next)."
+    },
+    meta: { requestId, source: "stub" }
+  }, requestId);
 }
