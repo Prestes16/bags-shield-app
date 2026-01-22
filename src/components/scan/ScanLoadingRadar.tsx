@@ -67,7 +67,7 @@ export function ScanLoadingRadar({ mint }: { mint: string }) {
           <h2 className="text-lg font-semibold">Scanning…</h2>
           <p className="mt-1 text-sm text-muted-foreground truncate">{mintTrimmed}</p>
 
-          <div className="mt-3 h-2 w-full rounded-full bg-white/10">
+          <div className="mt-3 h-2 w-full rounded-full bg-muted/40">
             <div className="h-2 rounded-full bg-primary/70" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">{pct}%</p>

@@ -18,11 +18,11 @@ export function SettingsScreen() {
   }
 
   return (
-    <AppShell title="Settings" subtitle="Tema e preferÃªncias">
+    <AppShell title="Settings" subtitle="Tema e preferências">
       <div className="rounded-3xl border border-surface/40 bg-surface/30 p-6 backdrop-blur-xl">
         <div className="text-sm font-semibold">Tema</div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Default continua padrÃ£o. Neon e Ice sÃ£o add-ons.
+          Default continua padrão. Neon e Ice são add-ons.
         </p>
 
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">

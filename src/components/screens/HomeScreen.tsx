@@ -11,33 +11,33 @@ export default function HomeScreen() {
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
 
-  // BotÃ£o Search: navegar para /search (que redireciona para /scan)
+  // Botão Search: navegar para /search (que redireciona para /scan)
   const handleSearch = () => {
     router.push("/search"); // Redireciona para /scan
   };
 
-  // BotÃ£o Connect Wallet: tentar conectar wallet real
+  // Botão Connect Wallet: tentar conectar wallet real
   const handleConnectWallet = async () => {
     setWalletError(null);
     const result = await connectWallet();
     
     if (result.ok) {
       setIsWalletConnected(true);
-      // ApÃ³s conectar, redirecionar para o Dashboard
+      // Após conectar, redirecionar para o Dashboard
       router.push("/dashboard");
     } else {
       setWalletError(result.error || "Falha ao conectar wallet.");
-      // Se nÃ£o tiver wallet, ainda permite navegar (modo demo)
-      // ou mostra erro para o usuÃ¡rio
+      // Se não tiver wallet, ainda permite navegar (modo demo)
+      // ou mostra erro para o usuário
     }
   };
 
-  // BotÃ£o Quick Scan: levar diretamente para pÃ¡gina de input de Mint Address
+  // Botão Quick Scan: levar diretamente para página de input de Mint Address
   const handleQuickScan = () => {
-    router.push("/scan"); // Tela 7/8: Scan input para iniciar anÃ¡lise
+    router.push("/scan"); // Tela 7/8: Scan input para iniciar análise
   };
 
-  // NavegaÃ§Ã£o do Bottom Nav
+  // Navegação do Bottom Nav
   const handleBottomNavSearch = () => {
     router.push("/search"); // Redireciona para /scan
   };
@@ -66,7 +66,7 @@ export default function HomeScreen() {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";
                   if (target.parentElement) {
-                    target.parentElement.innerHTML = "ðŸ›¡ï¸";
+                    target.parentElement.innerHTML = "🛡️";
                   }
                 }}
               />
@@ -77,11 +77,11 @@ export default function HomeScreen() {
             </div>
           </div>
 
-          {/* BotÃ£o Search */}
+          {/* Botão Search */}
           <Button
             onClick={handleSearch}
             variant="outline"
-            className="bg-white/5 border-white/10 text-white hover:bg-white/10"
+            className="bg-card/40 border-border/40 text-foreground hover:bg-card/55"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -115,7 +115,7 @@ export default function HomeScreen() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-          {/* BotÃ£o Connect Wallet */}
+          {/* Botão Connect Wallet */}
           {walletError && (
             <div className="w-full text-sm text-red-400 text-center mb-2">
               {walletError}
@@ -124,7 +124,7 @@ export default function HomeScreen() {
           <Button
             onClick={handleConnectWallet}
             disabled={isWalletConnected}
-            className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-black font-semibold shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+            className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold shadow-[0_0_20px_rgba(6,182,212,0.5)]"
           >
             {isWalletConnected ? (
               <>
@@ -163,11 +163,11 @@ export default function HomeScreen() {
             )}
           </Button>
 
-          {/* BotÃ£o Quick Scan */}
+          {/* Botão Quick Scan */}
           <Button
             onClick={handleQuickScan}
             variant="outline"
-            className="flex-1 bg-white/5 border-white/10 text-white hover:bg-white/10"
+            className="flex-1 bg-card/40 border-border/40 text-foreground hover:bg-card/55"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -188,7 +188,7 @@ export default function HomeScreen() {
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mt-8">
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
+          <div className="bg-card/40 backdrop-blur-md border border-border/40 rounded-2xl p-6 hover:bg-card/55 transition-colors">
             <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -200,7 +200,7 @@ export default function HomeScreen() {
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
+          <div className="bg-card/40 backdrop-blur-md border border-border/40 rounded-2xl p-6 hover:bg-card/55 transition-colors">
             <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -212,7 +212,7 @@ export default function HomeScreen() {
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
+          <div className="bg-card/40 backdrop-blur-md border border-border/40 rounded-2xl p-6 hover:bg-card/55 transition-colors">
             <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -227,13 +227,13 @@ export default function HomeScreen() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="border-t border-white/10 bg-background sticky bottom-0">
+      <nav className="border-t border-border/40 bg-background sticky bottom-0">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-around">
-            {/* Ãcone Lupa -> /search */}
+            {/* Ícone Lupa -> /search */}
             <button
               onClick={handleBottomNavSearch}
-              className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-muted/30 transition-colors"
               aria-label="Search"
             >
               <svg
@@ -252,10 +252,10 @@ export default function HomeScreen() {
               <span className="text-xs text-slate-400">Search</span>
             </button>
 
-            {/* Ãcone RelÃ³gio -> /history */}
+            {/* Ícone Relógio -> /history */}
             <button
               onClick={handleBottomNavHistory}
-              className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-muted/30 transition-colors"
               aria-label="History"
             >
               <svg
@@ -274,10 +274,10 @@ export default function HomeScreen() {
               <span className="text-xs text-slate-400">History</span>
             </button>
 
-            {/* Ãcone Engrenagem -> /settings */}
+            {/* Ícone Engrenagem -> /settings */}
             <button
               onClick={handleBottomNavSettings}
-              className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg hover:bg-muted/30 transition-colors"
               aria-label="Settings"
             >
               <svg

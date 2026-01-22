@@ -81,7 +81,7 @@ export default function Page() {
         <div className="mt-5 grid place-items-center">
           <div className="relative h-44 w-44">
             <div className="absolute inset-0 rounded-full" style={ringStyle} />
-            <div className="absolute inset-3 rounded-full border border-white/10 bg-background/10 backdrop-blur-xl" />
+            <div className="absolute inset-3 rounded-full border border-border/40 bg-card/20 backdrop-blur-xl" />
             <div className="absolute inset-0 grid place-items-center text-center">
               <div className="text-sm text-muted-foreground">ShieldScore</div>
               <div className="text-5xl font-semibold">{score}</div>
