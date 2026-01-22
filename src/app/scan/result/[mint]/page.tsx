@@ -9,6 +9,7 @@ import { shareSafe } from "@/components/shared/shareSafe";
 import { cn } from "@/lib/utils";
 import { getScanRecord } from "@/lib/scanStore";
 import { shouldShowScore } from "@/lib/scorePolicy";
+import { t } from "@/lib/i18n";
 
 type Severity = "ok" | "attention" | "high";
 type Finding = { id: string; title: string; severity: Severity; details?: string | string[]; hint?: string; };
@@ -67,7 +68,7 @@ export default function Page() {
 
   if (!canShowScore) {
     return (
-      <AppShell title="Scan Result" subtitle="Token not scanned">
+      <AppShell title="Scan Result" subtitle={t("ui.token_not_scanned")}>
         <div className="rounded-3xl border border-surface/40 bg-surface/30 p-5 backdrop-blur-xl min-w-0">
           <div className="flex items-center justify-between gap-3 min-w-0">
             <div className="min-w-0">
@@ -83,7 +84,7 @@ export default function Page() {
           </div>
           <div className="mt-5 text-center">
             <span className="inline-flex items-center rounded-full border border-surface/40 bg-surface/20 px-3 py-1 text-sm text-muted-foreground">
-              Not scanned
+              {t("ui.not_scanned")}
             </span>
           </div>
           <div className="mt-5">
@@ -91,7 +92,7 @@ export default function Page() {
               className="w-full"
               onClick={() => router.push(`/scan?mint=${encodeURIComponent(mint)}`)}
             >
-              Scan now
+              {t("ui.scan_now")}
             </Button>
           </div>
         </div>
@@ -100,7 +101,7 @@ export default function Page() {
   }
 
   return (
-    <AppShell title="Scan Result" subtitle="ShieldScore + Findings">
+    <AppShell title="Scan Result" subtitle={t("ui.scan_result_subtitle")}>
       <div className="rounded-3xl border border-surface/40 bg-surface/30 p-5 backdrop-blur-xl min-w-0">
         <div className="flex items-center justify-between gap-3 min-w-0">
           <div className="min-w-0">
@@ -115,8 +116,15 @@ export default function Page() {
           </div>
 
           <div className="text-right shrink-0">
-            <div className="text-xs text-muted-foreground">Grade</div>
+            <div className="text-xs text-muted-foreground">{t("ui.grade")}</div>
             <div className="mt-1 text-2xl font-semibold text-primary">{grade(score)}</div>
+            {isKnownScamHistory && (
+              <div className="mt-1">
+                <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
+                  {t("ui.scam_history")}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -125,7 +133,7 @@ export default function Page() {
             <div className="absolute inset-0 rounded-full" style={ringStyle} />
             <div className="absolute inset-3 rounded-full border border-border/40 bg-card/20 backdrop-blur-xl" />
             <div className="absolute inset-0 grid place-items-center text-center">
-              <div className="text-sm text-muted-foreground">ShieldScore</div>
+              <div className="text-sm text-muted-foreground">{t("ui.shield_score")}</div>
               <div className="text-5xl font-semibold">{score}</div>
               <div className="text-sm text-muted-foreground">({grade(score)})</div>
             </div>
@@ -154,19 +162,23 @@ export default function Page() {
 
       <div className="mt-4 flex gap-2">
         <Button variant="secondary" className="w-full" onClick={() => router.push("/simulate")}>
-          Simulate
+          {t("ui.simulate")}
         </Button>
         <Button className="w-full" onClick={async () => {
-          const r = await shareSafe({ title: "Bags Shield", text: "Scan result", url: window.location.href });
-          if (!r.ok) alert("Não deu pra compartilhar nem copiar.");
+          try {
+            const r = await shareSafe({ title: "Bags Shield", text: "Scan result", url: window.location.href });
+            if (!r.ok) alert("Failed to share or copy.");
+          } catch (err) {
+            // Fail silently
+          }
         }}>
-          Share
+          {t("ui.share")}
         </Button>
       </div>
 
       <div className="mt-3">
         <Button variant="secondary" className="w-full" onClick={() => router.push("/scan")}>
-          Scan again
+          {t("ui.scan_again")}
         </Button>
       </div>
     </AppShell>

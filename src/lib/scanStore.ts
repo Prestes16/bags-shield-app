@@ -10,6 +10,7 @@ export type ScanRecord = {
   risk: "low" | "medium" | "high";
   scannedAt: number;
   source: "scan" | "scam_history";
+  frozen?: boolean; // If true, grade should not change unless user rescans
 };
 
 const STORE_KEY = "bagsShield.scanRecords";
@@ -56,12 +57,13 @@ export function setScanRecord(record: ScanRecord): void {
 /**
  * Mark token as known scam history (frozen grade)
  */
-export function markKnownScamHistory(mint: string, record: Omit<ScanRecord, "source">): void {
+export function markKnownScamHistory(mint: string, record: Omit<ScanRecord, "source" | "frozen">): void {
   if (typeof window === "undefined") return;
   const store = getStore();
   store[mint] = {
     ...record,
     source: "scam_history",
+    frozen: true, // Scam history grades are frozen
   };
   setStore(store);
 }

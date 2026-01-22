@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/shared/AppShell";
 import { ScanLoadingRadar } from "@/components/scan/ScanLoadingRadar";
-import { setScanRecord } from "@/lib/scanStore";
+import { setScanRecord, getScanRecord } from "@/lib/scanStore";
 
 const isSolanaBase58 = (s: string) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s);
 
@@ -46,15 +46,19 @@ export default function ScanLoadingClient({ mint }: { mint: string }) {
           if (score < 40) risk = "high";
           else if (score < 70) risk = "medium";
 
-          // Save scan record
-          setScanRecord({
-            mint: m,
-            score,
-            grade,
-            risk,
-            scannedAt: Date.now(),
-            source: "scan",
-          });
+          // Save scan record (only if not frozen from scam history)
+          const existingRecord = getScanRecord(m);
+          if (!existingRecord?.frozen) {
+            setScanRecord({
+              mint: m,
+              score,
+              grade,
+              risk,
+              scannedAt: Date.now(),
+              source: "scan",
+              frozen: false,
+            });
+          }
 
           // Navigate to result
           router.replace(`/scan/result/${m}`);

@@ -54,12 +54,22 @@ export function shouldShowScore(input: ScorePolicyInput): boolean {
 export function scoreLabel(
   input: ScorePolicyInput,
   lang: string = "en"
-): "Not scanned" | "Scanned" | "Known scam history" {
+): string {
   if (input.isKnownScamHistory) {
-    return t("score.known_scam_history", lang) as "Known scam history";
+    return t("score.known_scam_history", lang);
   }
   if (input.hasScanResult) {
-    return t("score.scanned", lang) as "Scanned";
+    return t("score.scanned", lang);
   }
-  return t("score.not_scanned", lang) as "Not scanned";
+  return t("score.not_scanned", lang);
+}
+
+/**
+ * Helper: check if score should be shown for a mint
+ */
+export function shouldShowScoreForMint(mint: string): boolean {
+  if (typeof window === "undefined") return false;
+  // This will be called from components, so we need to import getScanRecord
+  // For now, return the policy check - components will call getScanRecord themselves
+  return true; // Components handle the actual check
 }

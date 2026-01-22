@@ -42,9 +42,9 @@ export function ScanLoadingRadar({ mint }: { mint: string }) {
   if (!valid) {
     return (
       <div className="rounded-3xl border border-red-500/30 bg-surface/30 p-6 backdrop-blur-xl">
-        <h2 className="text-lg font-semibold">Mint inválido</h2>
+        <h2 className="text-lg font-semibold">Invalid mint</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Volte e cole um mint Base58 válido.
+          Please enter a valid Base58 mint address.
         </p>
       </div>
     );
