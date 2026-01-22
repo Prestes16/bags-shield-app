@@ -6,6 +6,9 @@ import { AppShell } from "@/components/shared/AppShell";
 import { WatchlistSkeleton } from "@/components/states/WatchlistSkeleton";
 import { EmptyWatchlist } from "@/components/states/EmptyWatchlist";
 import { cn } from "@/lib/utils";
+import { getScanRecord } from "@/lib/scanStore";
+import { shouldShowScore, scoreLabel } from "@/lib/scorePolicy";
+import { Button } from "@/components/ui/button";
 
 type WatchedToken = {
   symbol: string;
@@ -46,40 +49,71 @@ export function WatchlistScreen() {
 
       {!loading && list.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {list.map((t) => (
-            <button
-              key={t.mint}
-              onClick={() => router.push(`/scan/result/${t.mint}`)}
-              className={cn(
-                "min-w-0 text-left rounded-3xl border border-surface/40 bg-surface/30 p-4 backdrop-blur-xl",
-                "transition hover:bg-surface/40",
-                glow(t.score)
-              )}
-            >
-              <div className="flex items-start justify-between gap-3 min-w-0">
-                <div className="min-w-0">
-                  <div className="text-xs text-muted-foreground truncate">{t.name}</div>
-                  <div className="text-lg font-semibold">{t.symbol}</div>
-                </div>
-                <div className={cn(
-                  "rounded-2xl border border-surface/40 bg-surface/30 px-3 py-2 shrink-0",
-                  t.alert ? "text-amber-300" : "text-muted-foreground"
-                )}>
-                  {t.alert ? "🔔" : "—"}
-                </div>
-              </div>
+          {list.map((t) => {
+            const scanRecord = getScanRecord(t.mint);
+            const hasScanResult = !!scanRecord;
+            const isKnownScamHistory = scanRecord?.source === "scam_history";
+            const canShowScore = shouldShowScore({ hasScanResult, isKnownScamHistory });
+            const label = scoreLabel({ hasScanResult, isKnownScamHistory });
 
-              <div className="mt-3 flex items-center justify-between">
-                <div className="text-xs text-muted-foreground">ShieldScore</div>
-                <div className="text-xl font-semibold text-primary">{t.score}</div>
-              </div>
+            return (
+              <div
+                key={t.mint}
+                className={cn(
+                  "min-w-0 rounded-3xl border border-surface/40 bg-surface/30 p-4 backdrop-blur-xl",
+                  canShowScore ? glow(scanRecord?.score || t.score) : ""
+                )}
+              >
+                <div className="flex items-start justify-between gap-3 min-w-0">
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground truncate">{t.name}</div>
+                    <div className="text-lg font-semibold">{t.symbol}</div>
+                  </div>
+                  <div className={cn(
+                    "rounded-2xl border border-surface/40 bg-surface/30 px-3 py-2 shrink-0",
+                    t.alert ? "text-amber-300" : "text-muted-foreground"
+                  )}>
+                    {t.alert ? "🔔" : "—"}
+                  </div>
+                </div>
 
-              <div className="mt-2 text-xs text-muted-foreground truncate">{t.mint}</div>
-              <div className="mt-3 text-sm">
-                {t.trend === "up" ? <span className="text-emerald-400">▲ Uptrend</span> : <span className="text-rose-400">▼ Downtrend</span>}
+                {canShowScore ? (
+                  <>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="text-xs text-muted-foreground">ShieldScore</div>
+                      <div className="text-xl font-semibold text-primary">{scanRecord?.score || t.score}</div>
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground truncate">{t.mint}</div>
+                    <div className="mt-3 text-sm">
+                      {t.trend === "up" ? <span className="text-emerald-400">▲ Uptrend</span> : <span className="text-rose-400">▼ Downtrend</span>}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="text-xs text-muted-foreground">{label}</div>
+                      <span className="inline-flex items-center rounded-full border border-surface/40 bg-surface/20 px-2 py-1 text-xs text-muted-foreground">
+                        Not scanned
+                      </span>
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground truncate">{t.mint}</div>
+                    <div className="mt-3">
+                      <Button
+                        size="sm"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/scan?mint=${encodeURIComponent(t.mint)}`);
+                        }}
+                      >
+                        Scan now
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
-            </button>
-          ))}
+            );
+          })}
         </div>
       ) : null}
     </AppShell>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -10,25 +10,39 @@ export default function HomeScreen() {
   const router = useRouter();
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletError, setWalletError] = useState<string | null>(null);
+  const [isWalletAvailable, setIsWalletAvailable] = useState<boolean | null>(null);
 
-  // Botão Search: navegar para /search (que redireciona para /scan)
+  // Check wallet availability (does not connect automatically)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const w = window as any;
+      setIsWalletAvailable(!!w?.solana);
+    }
+  }, []);
+
+  // Button Search: navigate to /search (redirects to /scan)
   const handleSearch = () => {
-    router.push("/search"); // Redireciona para /scan
+    router.push("/search");
   };
 
-  // Botão Connect Wallet: tentar conectar wallet real
+  // Button Connect Wallet: try to connect wallet (only on click)
   const handleConnectWallet = async () => {
     setWalletError(null);
-    const result = await connectWallet();
     
-    if (result.ok) {
-      setIsWalletConnected(true);
-      // Após conectar, redirecionar para o Dashboard
-      router.push("/dashboard");
-    } else {
-      setWalletError(result.error || "Falha ao conectar wallet.");
-      // Se não tiver wallet, ainda permite navegar (modo demo)
-      // ou mostra erro para o usuário
+    try {
+      const result = await connectWallet();
+      
+      if (result.ok) {
+        setIsWalletConnected(true);
+        // After connecting, redirect to Dashboard
+        router.push("/dashboard");
+      } else {
+        setWalletError(result.error || "Failed to connect wallet.");
+        // If no wallet, still allows navigation (demo mode)
+      }
+    } catch (error: any) {
+      // Final safety catch (should never reach here, but fail-safe)
+      setWalletError(error?.message || "Unexpected error connecting wallet");
     }
   };
 
@@ -121,10 +135,15 @@ export default function HomeScreen() {
               {walletError}
             </div>
           )}
+          {isWalletAvailable === false && !walletError && (
+            <div className="w-full text-sm text-slate-400 text-center mb-2">
+              Wallet not available (demo mode)
+            </div>
+          )}
           <Button
             onClick={handleConnectWallet}
             disabled={isWalletConnected}
-            className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+            className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold shadow-[0_0_20px_rgba(6,182,212,0.5)] disabled:opacity-50"
           >
             {isWalletConnected ? (
               <>
@@ -141,7 +160,7 @@ export default function HomeScreen() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Conectado
+                Connected
               </>
             ) : (
               <>

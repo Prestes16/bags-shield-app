@@ -1,0 +1,67 @@
+/**
+ * localStorage-backed scan record store
+ * Safe for SSR: guards typeof window === "undefined"
+ */
+
+export type ScanRecord = {
+  mint: string;
+  score: number;
+  grade: string;
+  risk: "low" | "medium" | "high";
+  scannedAt: number;
+  source: "scan" | "scam_history";
+};
+
+const STORE_KEY = "bagsShield.scanRecords";
+
+function getStore(): Record<string, ScanRecord> {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = localStorage.getItem(STORE_KEY);
+    if (!stored) return {};
+    return JSON.parse(stored);
+  } catch {
+    return {};
+  }
+}
+
+function setStore(store: Record<string, ScanRecord>): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  } catch {
+    // Fail silently
+  }
+}
+
+/**
+ * Get scan record for a mint
+ */
+export function getScanRecord(mint: string): ScanRecord | null {
+  if (typeof window === "undefined") return null;
+  const store = getStore();
+  return store[mint] || null;
+}
+
+/**
+ * Set scan record (from scan API)
+ */
+export function setScanRecord(record: ScanRecord): void {
+  if (typeof window === "undefined") return;
+  const store = getStore();
+  store[record.mint] = record;
+  setStore(store);
+}
+
+/**
+ * Mark token as known scam history (frozen grade)
+ */
+export function markKnownScamHistory(mint: string, record: Omit<ScanRecord, "source">): void {
+  if (typeof window === "undefined") return;
+  const store = getStore();
+  store[mint] = {
+    ...record,
+    source: "scam_history",
+  };
+  setStore(store);
+}
