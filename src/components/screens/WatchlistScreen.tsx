@@ -10,6 +10,7 @@ import { getScanRecord } from "@/lib/scanStore";
 import { shouldShowScore, scoreLabel } from "@/lib/scorePolicy";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
+import { TokenAvatar } from "@/components/token/TokenAvatar";
 
 type WatchedToken = {
   symbol: string;
@@ -66,9 +67,16 @@ export function WatchlistScreen() {
                 )}
               >
                 <div className="flex items-start justify-between gap-3 min-w-0">
-                  <div className="min-w-0">
-                    <div className="text-xs text-muted-foreground truncate">{token.name}</div>
-                    <div className="text-lg font-semibold">{token.symbol}</div>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <TokenAvatar
+                      imageUrl={scanRecord?.tokenMeta?.imageUrl}
+                      symbol={token.symbol}
+                      size={40}
+                    />
+                    <div className="min-w-0">
+                      <div className="text-xs text-muted-foreground truncate">{token.name}</div>
+                      <div className="text-lg font-semibold">{token.symbol}</div>
+                    </div>
                   </div>
                   <div className={cn(
                     "rounded-2xl border border-surface/40 bg-surface/30 px-3 py-2 shrink-0",

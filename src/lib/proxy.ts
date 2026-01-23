@@ -2,8 +2,31 @@
  * Generic proxy helper for forwarding requests to Bags Shield API backend
  */
 
+import { validateBackendUrl } from "./urlValidation";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/**
+ * Validate CORS origin (basic check)
+ */
+function isValidOrigin(origin: string): boolean {
+  if (!origin || typeof origin !== "string") return false;
+  try {
+    const url = new URL(origin);
+    // Only allow http/https
+    if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+    // Block localhost/internal IPs in production
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === "localhost" || hostname.startsWith("127.") || hostname.startsWith("192.168.")) {
+      // Allow localhost only in development
+      return process.env.NODE_ENV === "development";
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function jsonError(status: number, error: string, detail?: string) {
   const payload: { success: false; error: string; detail?: string } = { success: false, error };
@@ -115,23 +138,40 @@ export async function forwardToBackend(
     return jsonError(501, "MISSING_BAGS_SHIELD_API_BASE");
   }
 
+  // SSRF Protection: validate backend URL
+  const urlValidation = validateBackendUrl(base, { kind: "backend" });
+  if (!urlValidation.valid) {
+    return jsonError(400, "INVALID_BACKEND_URL", urlValidation.error);
+  }
+  
+  // Use normalized URL if available
+  const validatedBase = urlValidation.normalized || base;
+
   const method = (req.method || "GET").toUpperCase();
 
   // OPTIONS: responde rápido
   if (method === "OPTIONS") {
-    const origin = req.headers.get("origin");
-    return new Response(null, {
-      status: 204,
-      headers: {
-        "access-control-allow-origin": origin || "*",
-        "access-control-allow-methods": "GET,POST,OPTIONS",
-        "access-control-allow-headers": "content-type, authorization, x-request-id, x-api-key",
-        "cache-control": "no-store",
-      },
-    });
+    const origin = req.headers.get("origin") || "";
+    const allowOrigin = origin && isValidOrigin(origin) ? origin : "";
+
+    const headers = new Headers();
+    headers.set("cache-control", "no-store, no-cache, must-revalidate");
+    headers.set("access-control-allow-methods", "GET,POST,OPTIONS");
+    headers.set("access-control-allow-headers", "content-type, authorization, x-request-id, x-api-key");
+    headers.set("access-control-allow-credentials", "false");
+    headers.set("access-control-max-age", "600");
+
+    // ✅ Só seta allow-origin se a origem for válida.
+    // ❌ Se inválida: NÃO envia header nenhum (nada de "null" e nada de "*")
+    if (allowOrigin) {
+      headers.set("access-control-allow-origin", allowOrigin);
+      headers.set("vary", "Origin");
+    }
+
+    return new Response(null, { status: 204, headers });
   }
 
-  const url = buildUpstreamUrl(req, base, backendPath);
+  const url = buildUpstreamUrl(req, validatedBase, backendPath);
   const headers = pickForwardHeaders(req);
 
   const ac = new AbortController();
@@ -154,9 +194,16 @@ export async function forwardToBackend(
       method,
       headers,
       body,
+      redirect: "manual", // ✅ CRÍTICO: bloqueia redirects SSRF
       signal: ac.signal,
       cache: "no-store" as any,
     });
+
+    // ✅ Se backend tentar redirecionar, a gente bloqueia.
+    if (upstream.status >= 300 && upstream.status < 400) {
+      clearTimeout(t);
+      return jsonError(502, "BACKEND_REDIRECT_BLOCKED", "Backend redirect blocked for security");
+    }
   } catch (e: any) {
     clearTimeout(t);
     const msg = e?.name === "AbortError" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_FETCH_FAILED";
@@ -168,6 +215,18 @@ export async function forwardToBackend(
   // Repasse do response (status + body + headers filtrados)
   const buf = await upstream.arrayBuffer();
   const filteredHeaders = filterHopByHopHeaders(upstream.headers);
+
+  // ✅ SEMPRE força cache-control: no-store (override do backend)
+  filteredHeaders.set("cache-control", "no-store, no-cache, must-revalidate");
+
+  // CORS: se tiver origem válida, adiciona headers CORS
+  const origin = req.headers.get("origin") || "";
+  const allowOrigin = origin && isValidOrigin(origin) ? origin : "";
+  if (allowOrigin) {
+    filteredHeaders.set("access-control-allow-origin", allowOrigin);
+    filteredHeaders.set("vary", "Origin");
+  }
+  // Se origem inválida: NÃO setar allow-origin
 
   return new Response(buf, {
     status: upstream.status,

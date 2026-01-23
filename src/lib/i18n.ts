@@ -18,6 +18,9 @@ const i18n: Record<string, Record<string, string>> = {
     "ui.scan_again": "Scan again",
     "ui.share": "Share",
     "ui.simulate": "Simulate",
+    "error.backend_html": "Backend returned HTML instead of JSON. Check BAGS_SHIELD_API_BASE and /api/scan proxy configuration.",
+    "error.scan_failed": "Scan failed",
+    "error.invalid_response": "Invalid response from backend",
   },
   ptBR: {
     "ui.not_scanned": "Não escaneado",
@@ -33,6 +36,9 @@ const i18n: Record<string, Record<string, string>> = {
     "ui.scan_again": "Escanear novamente",
     "ui.share": "Compartilhar",
     "ui.simulate": "Simular",
+    "error.backend_html": "Backend retornou HTML ao invés de JSON. Verifique BAGS_SHIELD_API_BASE e configuração do proxy /api/scan.",
+    "error.scan_failed": "Falha no scan",
+    "error.invalid_response": "Resposta inválida do backend",
   },
 };
 

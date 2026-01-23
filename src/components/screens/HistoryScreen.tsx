@@ -8,6 +8,7 @@ import { getScanRecord } from "@/lib/scanStore";
 import { shouldShowScore, scoreLabel } from "@/lib/scorePolicy";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
+import { TokenAvatar } from "@/components/token/TokenAvatar";
 
 const items = [
   { mint: "So11111111111111111111111111111111111111112", when: "Today", score: 92, grade: "A" },
@@ -58,23 +59,40 @@ export function HistoryScreen() {
                     </span>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold">{t("ui.grade")} {x.displayGrade}</div>
-                  <div className="text-sm text-primary font-semibold">{x.displayScore}</div>
+                <div className="flex items-center gap-3">
+                  <TokenAvatar
+                    imageUrl={x.scanRecord?.tokenMeta?.imageUrl}
+                    symbol={x.scanRecord?.tokenMeta?.symbol || x.mint.slice(0, 2)}
+                    size={32}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-semibold">{t("ui.grade")} {x.displayGrade}</div>
+                      <div className="text-sm text-primary font-semibold">{x.displayScore}</div>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground truncate">{x.mint}</div>
+                    <div className="mt-2 text-xs text-muted-foreground">{x.when}</div>
+                  </div>
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground truncate">{x.mint}</div>
-                <div className="mt-2 text-xs text-muted-foreground">{x.when}</div>
               </button>
             ) : (
               <>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold">{x.label}</div>
-                  <span className="inline-flex items-center rounded-full border border-surface/40 bg-surface/20 px-2 py-1 text-xs text-muted-foreground">
-                    {t("ui.not_scanned")}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <TokenAvatar
+                    symbol={x.mint.slice(0, 2)}
+                    size={32}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-semibold">{x.label}</div>
+                      <span className="inline-flex items-center rounded-full border border-surface/40 bg-surface/20 px-2 py-1 text-xs text-muted-foreground">
+                        {t("ui.not_scanned")}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground truncate">{x.mint}</div>
+                    <div className="mt-2 text-xs text-muted-foreground">{x.when}</div>
+                  </div>
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground truncate">{x.mint}</div>
-                <div className="mt-2 text-xs text-muted-foreground">{x.when}</div>
                 <div className="mt-3">
                   <Button
                     size="sm"

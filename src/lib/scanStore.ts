@@ -3,6 +3,9 @@
  * Safe for SSR: guards typeof window === "undefined"
  */
 
+import { TokenMeta } from "./tokenMeta";
+import { ScanReportNormalized } from "./scanTypes";
+
 export type ScanRecord = {
   mint: string;
   score: number;
@@ -11,6 +14,9 @@ export type ScanRecord = {
   scannedAt: number;
   source: "scan" | "scam_history";
   frozen?: boolean; // If true, grade should not change unless user rescans
+  tokenMeta?: TokenMeta; // Token metadata from backend (if available)
+  report?: ScanReportNormalized; // Full normalized scan report
+  fetchedAt?: number; // Timestamp when report was fetched
 };
 
 const STORE_KEY = "bagsShield.scanRecords";
