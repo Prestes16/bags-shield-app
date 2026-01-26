@@ -1,9 +1,28 @@
-export async function connectWallet() {
+/**
+ * Safe Solana wallet connection helper
+ * Fail-safe: never leaves promise rejection unhandled
+ */
+export async function connectWallet(): Promise<
+  | { ok: true; address: string }
+  | { ok: false; error: string }
+> {
+  // Check if in browser
+  if (typeof window === "undefined") {
+    return {
+      ok: false,
+      error: "Wallet not available (server-side)",
+    };
+  }
+
   const w = window as any;
   const provider = w?.solana;
 
+  // Check if any Solana wallet is available
   if (!provider) {
-    return { ok: false, error: "Nenhuma wallet detectada no navegador." };
+    return {
+      ok: false,
+      error: "Wallet not available (demo mode)",
+    };
   }
 
   try {
@@ -12,10 +31,32 @@ export async function connectWallet() {
       res?.publicKey?.toString?.() ||
       provider.publicKey?.toString?.();
 
-    if (!pubkey) return { ok: false, error: "Conectou, mas não retornou publicKey." };
+    if (!pubkey) {
+      return {
+        ok: false,
+        error: "Connected but no publicKey returned",
+      };
+    }
 
     return { ok: true, address: pubkey };
   } catch (e: any) {
-    return { ok: false, error: e?.message || "Falha ao conectar wallet." };
+    // Capture all possible errors
+    const errorMessage =
+      e?.message ||
+      e?.toString() ||
+      "Failed to connect wallet";
+
+    // Specific error for user rejection
+    if (e?.code === 4001 || errorMessage.includes("rejected")) {
+      return {
+        ok: false,
+        error: "Connection rejected by user",
+      };
+    }
+
+    return {
+      ok: false,
+      error: errorMessage,
+    };
   }
 }

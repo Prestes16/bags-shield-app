@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,16 @@ function isBase58Mint(v: string) {
 
 export function ScanInput() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mint, setMint] = useState("");
+
+  // Pre-fill mint from query param
+  useEffect(() => {
+    const mintParam = searchParams.get("mint");
+    if (mintParam && isBase58Mint(mintParam)) {
+      setMint(mintParam);
+    }
+  }, [searchParams]);
 
   const ok = useMemo(() => isBase58Mint(mint), [mint]);
 
@@ -21,7 +30,7 @@ export function ScanInput() {
     <div className="rounded-3xl border border-surface/40 bg-surface/30 p-5 backdrop-blur-xl">
       <h2 className="text-lg font-semibold">Scan token</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Cole o mint address (Base58) e rode o scan.
+        Enter mint address (Base58) and run scan.
       </p>
 
       <div className="mt-4">
@@ -36,7 +45,7 @@ export function ScanInput() {
           )}
         />
         {!ok && mint.trim().length > 0 ? (
-          <p className="mt-2 text-xs text-red-400">Mint inválido (Base58 32–44 chars).</p>
+          <p className="mt-2 text-xs text-red-400">Invalid mint (Base58 32–44 chars).</p>
         ) : null}
       </div>
 

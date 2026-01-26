@@ -4,13 +4,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  return forwardToBackend(req, "/api/launchpad/ping");
+  return forwardToBackend(req, "/api/simulate");
 }
 
 export async function POST(req: Request) {
-  return forwardToBackend(req, "/api/launchpad/ping");
+  return forwardToBackend(req, "/api/simulate");
 }
 
 export async function OPTIONS(req: Request) {
-  return forwardToBackend(req, "/api/launchpad/ping");
+  return forwardToBackend(req, "/api/simulate");
 }
