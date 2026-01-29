@@ -3,7 +3,12 @@
  * Defensive: accepts multiple backend shapes, never throws
  */
 
-import { ScanReportNormalized, ScanGrade, RiskLabel, ScanFinding } from "./scanTypes";
+import {
+  ScanReportNormalized,
+  ScanGrade,
+  RiskLabel,
+  ScanFinding,
+} from "./scanTypes";
 import { extractTokenMeta } from "./tokenMeta";
 
 function deriveGrade(score: number | null | undefined): ScanGrade {
@@ -15,7 +20,10 @@ function deriveGrade(score: number | null | undefined): ScanGrade {
   return "E";
 }
 
-function deriveRiskLabel(grade: ScanGrade, score: number | null | undefined): RiskLabel {
+function deriveRiskLabel(
+  grade: ScanGrade,
+  score: number | null | undefined,
+): RiskLabel {
   if (grade === "A" || grade === "B") return "Low";
   if (grade === "C") return "Medium";
   if (grade === "D") return "High";
@@ -28,19 +36,22 @@ function extractFindings(raw: any): ScanFinding[] {
   if (!raw) return [];
 
   // Try various response shapes
-  const findings = raw.findings || raw.risks || raw.issues || raw.warnings || [];
+  const findings =
+    raw.findings || raw.risks || raw.issues || raw.warnings || [];
 
   if (!Array.isArray(findings)) return [];
 
   return findings
     .filter((f: any) => f && (f.id || f.title || f.name))
-    .map((f: any, idx: number): ScanFinding => ({
-      id: f.id || f.name || `finding-${idx}`,
-      title: f.title || f.name || f.label || "Finding",
-      description: f.description || f.desc || f.message || undefined,
-      severity: f.severity || f.level || f.risk || undefined,
-      details: f.details || f.info || f.note || undefined,
-    }));
+    .map(
+      (f: any, idx: number): ScanFinding => ({
+        id: f.id || f.name || `finding-${idx}`,
+        title: f.title || f.name || f.label || "Finding",
+        description: f.description || f.desc || f.message || undefined,
+        severity: f.severity || f.level || f.risk || undefined,
+        details: f.details || f.info || f.note || undefined,
+      }),
+    );
 }
 
 function extractAuthorities(raw: any): ScanReportNormalized["authorities"] {
@@ -50,9 +61,12 @@ function extractAuthorities(raw: any): ScanReportNormalized["authorities"] {
   if (typeof auth !== "object") return undefined;
 
   return {
-    freezeAuthority: auth.freezeAuthority || auth.freeze || auth.hasFreezeAuthority || null,
-    mintAuthority: auth.mintAuthority || auth.mint || auth.hasMintAuthority || null,
-    updateAuthority: auth.updateAuthority || auth.update || auth.hasUpdateAuthority || null,
+    freezeAuthority:
+      auth.freezeAuthority || auth.freeze || auth.hasFreezeAuthority || null,
+    mintAuthority:
+      auth.mintAuthority || auth.mint || auth.hasMintAuthority || null,
+    updateAuthority:
+      auth.updateAuthority || auth.update || auth.hasUpdateAuthority || null,
   };
 }
 
@@ -76,8 +90,13 @@ function extractHolders(raw: any): ScanReportNormalized["holders"] {
   if (typeof holders !== "object") return undefined;
 
   return {
-    top10Concentration: holders.top10Concentration || holders.concentration || holders.top10 || null,
-    totalHolders: holders.totalHolders || holders.count || holders.total || null,
+    top10Concentration:
+      holders.top10Concentration ||
+      holders.concentration ||
+      holders.top10 ||
+      null,
+    totalHolders:
+      holders.totalHolders || holders.count || holders.total || null,
   };
 }
 
@@ -123,7 +142,11 @@ function extractTimestamps(raw: any): ScanReportNormalized["timestamps"] {
   if (!raw) return undefined;
 
   return {
-    scannedAt: raw.scannedAt ? (typeof raw.scannedAt === "number" ? raw.scannedAt : Date.parse(raw.scannedAt) || null) : null,
+    scannedAt: raw.scannedAt
+      ? typeof raw.scannedAt === "number"
+        ? raw.scannedAt
+        : Date.parse(raw.scannedAt) || null
+      : null,
     evaluatedAt: raw.evaluatedAt || raw.evaluated_at || raw.timestamp || null,
   };
 }
@@ -132,7 +155,10 @@ function extractTimestamps(raw: any): ScanReportNormalized["timestamps"] {
  * Normalize backend scan response to UI-friendly format
  * Never throws; returns best-effort normalized report
  */
-export function normalizeScanResponse(raw: any, mint: string): ScanReportNormalized {
+export function normalizeScanResponse(
+  raw: any,
+  mint: string,
+): ScanReportNormalized {
   if (!raw || typeof raw !== "object") {
     return {
       mint,
@@ -144,12 +170,16 @@ export function normalizeScanResponse(raw: any, mint: string): ScanReportNormali
   }
 
   // Extract score from various shapes
-  const score = raw.shieldScore ?? raw.score ?? raw.securityScore ?? raw.riskScore ?? null;
+  const score =
+    raw.shieldScore ?? raw.score ?? raw.securityScore ?? raw.riskScore ?? null;
   const grade = deriveGrade(score);
   const riskLabel = deriveRiskLabel(grade, score);
 
-  // Extract token metadata
-  const tokenMeta = extractTokenMeta(raw);
+  // Extract token metadata: prioritize raw.tokenMeta if it exists (from /api/scan enrichment)
+  // Then fallback to raw.metadata, raw.tokenMetadata, raw.tokenInfo, or raw itself
+  const tokenMetaRaw =
+    raw.tokenMeta ?? raw.metadata ?? raw.tokenMetadata ?? raw.tokenInfo ?? raw;
+  const tokenMeta = extractTokenMeta(tokenMetaRaw);
 
   // Extract findings
   const findings = extractFindings(raw);
@@ -166,37 +196,58 @@ export function normalizeScanResponse(raw: any, mint: string): ScanReportNormali
 
   // Extract optional sections (only if they exist)
   const authorities = extractAuthorities(raw);
-  if (authorities && Object.values(authorities).some((v) => v !== null && v !== undefined)) {
+  if (
+    authorities &&
+    Object.values(authorities).some((v) => v !== null && v !== undefined)
+  ) {
     report.authorities = authorities;
   }
 
   const liquidity = extractLiquidity(raw);
-  if (liquidity && Object.values(liquidity).some((v) => v !== null && v !== undefined)) {
+  if (
+    liquidity &&
+    Object.values(liquidity).some((v) => v !== null && v !== undefined)
+  ) {
     report.liquidity = liquidity;
   }
 
   const holders = extractHolders(raw);
-  if (holders && Object.values(holders).some((v) => v !== null && v !== undefined)) {
+  if (
+    holders &&
+    Object.values(holders).some((v) => v !== null && v !== undefined)
+  ) {
     report.holders = holders;
   }
 
   const taxes = extractTaxes(raw);
-  if (taxes && Object.values(taxes).some((v) => v !== null && v !== undefined)) {
+  if (
+    taxes &&
+    Object.values(taxes).some((v) => v !== null && v !== undefined)
+  ) {
     report.taxes = taxes;
   }
 
   const metadata = extractMetadata(raw);
-  if (metadata && Object.values(metadata).some((v) => v !== null && v !== undefined)) {
+  if (
+    metadata &&
+    Object.values(metadata).some((v) => v !== null && v !== undefined)
+  ) {
     report.metadata = metadata;
   }
 
   const route = extractRoute(raw);
-  if (route && Object.values(route).some((v) => v !== null && v !== undefined)) {
+  if (
+    route &&
+    Object.values(route).some((v) => v !== null && v !== undefined)
+  ) {
     report.route = route;
   }
 
   const timestamps = extractTimestamps(raw);
-  if (timestamps && Object.values(timestamps).some((v) => v !== null && v !== undefined)) {
+  if (
+    timestamps &&
+    Object.values(timestamps).some((v) => v !== null && v !== undefined)
+  ) {
     report.timestamps = timestamps;
   }
 

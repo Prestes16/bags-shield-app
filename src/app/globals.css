@@ -175,3 +175,18 @@ html, body{
   padding-bottom: env(safe-area-inset-bottom);
   height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
 }
+/* Wallet Adapter Override */
+.wallet-adapter-button {
+  background-color: #06b6d4 !important;
+  color: #020617 !important;
+  font-weight: bold !important;
+  border-radius: 12px !important;
+  transition: all 0.2s !important;
+}
+.wallet-adapter-button:hover {
+  background-color: #0891b2 !important;
+}
+.wallet-adapter-modal-wrapper {
+  background-color: #0f172a !important;
+  border: 1px solid #1e293b !important;
+}

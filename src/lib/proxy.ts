@@ -71,7 +71,7 @@ function pickForwardHeaders(req: Request): Headers {
     if (v) out.set(k, v);
   }
 
-  // Gera x-request-id se não vier no request
+  // Gera x-request-id se n�o vier no request
   if (!out.has("x-request-id")) {
     try {
       out.set("x-request-id", crypto.randomUUID());
@@ -86,7 +86,7 @@ function pickForwardHeaders(req: Request): Headers {
 }
 
 function filterHopByHopHeaders(upstreamHeaders: Headers): Headers {
-  // Headers hop-by-hop que NÃO devem ser repassados
+  // Headers hop-by-hop que N�O devem ser repassados
   const hopByHop = [
     "connection",
     "keep-alive",
@@ -162,7 +162,7 @@ export async function forwardToBackend(
     headers.set("access-control-max-age", "600");
 
     // ✅ Só seta allow-origin se a origem for válida.
-    // ❌ Se inválida: NÃO envia header nenhum (nada de "null" e nada de "*")
+    // ? Se inv�lida: N�O envia header nenhum (nada de "null" e nada de "*")
     if (allowOrigin) {
       headers.set("access-control-allow-origin", allowOrigin);
       headers.set("vary", "Origin");
@@ -226,7 +226,7 @@ export async function forwardToBackend(
     filteredHeaders.set("access-control-allow-origin", allowOrigin);
     filteredHeaders.set("vary", "Origin");
   }
-  // Se origem inválida: NÃO setar allow-origin
+  // Se origem inv�lida: N�O setar allow-origin
 
   return new Response(buf, {
     status: upstream.status,

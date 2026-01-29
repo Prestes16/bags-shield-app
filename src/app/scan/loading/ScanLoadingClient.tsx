@@ -11,7 +11,7 @@ import { normalizeScanResponse } from "@/lib/scanNormalize";
 
 const isSolanaBase58 = (s: string) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(s);
 
-export default function ScanLoadingClient({ mint }: { mint: string }) {
+export default function ScanLoadingClient({ mint, pro, signature }: { mint: string; pro?: boolean; signature?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -25,16 +25,24 @@ export default function ScanLoadingClient({ mint }: { mint: string }) {
 
     // Perform scan API call
     const performScan = async () => {
+      const currentPro = pro;
+      const currentSignature = signature;
       try {
         // Call scan API - proxy will forward to backend
+        const body: any = { mint: m };
+        if (currentPro === true) {
+          body.pro = true;
+          if (currentSignature) {
+            body.proSignature = currentSignature;
+          }
+        }
+
         const response = await fetch("/api/scan", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            mint: m,
-          }),
+          body: JSON.stringify(body),
         });
 
         // Defensive: check content-type
@@ -104,7 +112,7 @@ export default function ScanLoadingClient({ mint }: { mint: string }) {
     };
 
     performScan();
-  }, [mint, router]);
+  }, [mint, pro, signature, router]);
 
   const m = (mint || "").trim();
   if (!isSolanaBase58(m)) {
