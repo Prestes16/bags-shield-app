@@ -8,10 +8,10 @@ console.log('');
 
 // Test Base58 validation logic
 function testBase58Logic() {
-  console.log('ðŸ“¦ Testing Base58 Validation Logic...');
-  
+  console.log(' Testing Base58 Validation Logic...');
+
   const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-  
+
   function isValidBase58(input) {
     if (!input || typeof input !== 'string') return false;
     for (let i = 0; i < input.length; i++) {
@@ -19,13 +19,13 @@ function testBase58Logic() {
     }
     return true;
   }
-  
+
   function isValidMint(mint) {
     if (!mint || typeof mint !== 'string') return false;
     if (mint.length < 32 || mint.length > 44) return false;
     return isValidBase58(mint);
   }
-  
+
   // Test cases
   const tests = [
     { input: '11111111111111111111111111111112', expected: true, description: 'Valid mint address' },
@@ -34,23 +34,23 @@ function testBase58Logic() {
     { input: 'short', expected: false, description: 'Too short' },
     { input: '', expected: false, description: 'Empty string' },
   ];
-  
+
   let passed = 0;
   tests.forEach(test => {
     const result = isValidMint(test.input);
-    const status = result === test.expected ? 'âœ…' : 'âŒ';
+    const status = result === test.expected ? '' : '';
     console.log(`  ${status} ${test.description}: ${result === test.expected ? 'PASSED' : 'FAILED'}`);
     if (result === test.expected) passed++;
   });
-  
+
   console.log(`  Result: ${passed}/${tests.length} tests passed`);
   console.log('');
 }
 
 // Test SSRF protection logic
 function testSSRFLogic() {
-  console.log('ðŸ“¦ Testing SSRF Protection Logic...');
-  
+  console.log(' Testing SSRF Protection Logic...');
+
   const BLOCKED_HOSTS = ['localhost', '127.0.0.1', '::1', '0.0.0.0'];
   const PRIVATE_IP_PATTERNS = [
     /^192\.168\./,
@@ -58,46 +58,46 @@ function testSSRFLogic() {
     /^172\.(1[6-9]|2\d|3[01])\./,
     /^169\.254\./,
   ];
-  
+
   function validateUrl(input) {
     if (!input || typeof input !== 'string') {
       return { allowed: false, reason: 'Invalid input type' };
     }
-    
+
     let url;
     try {
       url = new URL(input);
     } catch {
       return { allowed: false, reason: 'Invalid URL format' };
     }
-    
+
     // Only HTTPS allowed
     if (url.protocol !== 'https:') {
       return { allowed: false, reason: 'Only HTTPS URLs allowed' };
     }
-    
+
     const hostname = url.hostname.toLowerCase();
-    
+
     // Block localhost variants
     if (BLOCKED_HOSTS.includes(hostname)) {
       return { allowed: false, reason: 'Localhost URLs blocked' };
     }
-    
+
     // Block private IP ranges
     for (const pattern of PRIVATE_IP_PATTERNS) {
       if (pattern.test(hostname)) {
         return { allowed: false, reason: 'Private IP ranges blocked' };
       }
     }
-    
+
     // Block IP addresses
     if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
       return { allowed: false, reason: 'IP addresses not allowed' };
     }
-    
+
     return { allowed: true };
   }
-  
+
   // Test cases
   const tests = [
     { url: 'https://example.com', expected: true, description: 'Valid HTTPS URL' },
@@ -108,68 +108,68 @@ function testSSRFLogic() {
     { url: 'https://8.8.8.8', expected: false, description: 'Public IP blocked' },
     { url: 'file:///etc/passwd', expected: false, description: 'File scheme blocked' },
   ];
-  
+
   let passed = 0;
   tests.forEach(test => {
     const result = validateUrl(test.url);
     const success = result.allowed === test.expected;
-    const status = success ? 'âœ…' : 'âŒ';
+    const status = success ? '' : '';
     console.log(`  ${status} ${test.description}: ${success ? 'PASSED' : 'FAILED'} - ${result.reason || 'OK'}`);
     if (success) passed++;
   });
-  
+
   console.log(`  Result: ${passed}/${tests.length} tests passed`);
   console.log('');
 }
 
 // Test TTL Cache logic
 function testTTLCacheLogic() {
-  console.log('ðŸ“¦ Testing TTL Cache Logic...');
-  
+  console.log(' Testing TTL Cache Logic...');
+
   class TTLCache {
     constructor(maxSize = 100, defaultTTL = 300000) {
       this.cache = new Map();
       this.maxSize = maxSize;
       this.defaultTTL = defaultTTL;
     }
-    
+
     set(key, value, ttl) {
       const now = Date.now();
       const expiresAt = now + (ttl || this.defaultTTL);
-      
+
       if (this.cache.size >= this.maxSize) {
         const oldestKey = this.cache.keys().next().value;
         if (oldestKey) this.cache.delete(oldestKey);
       }
-      
+
       this.cache.set(key, { value, expiresAt, createdAt: now });
     }
-    
+
     get(key) {
       const entry = this.cache.get(key);
       if (!entry) return undefined;
-      
+
       const now = Date.now();
       if (now > entry.expiresAt) {
         this.cache.delete(key);
         return undefined;
       }
-      
+
       return entry.value;
     }
-    
+
     has(key) {
       return this.get(key) !== undefined;
     }
-    
+
     size() {
       return this.cache.size;
     }
   }
-  
+
   // Test basic operations
   const cache = new TTLCache(3, 100); // Small cache, short TTL for testing
-  
+
   const tests = [
     {
       name: 'Set and Get',
@@ -189,7 +189,7 @@ function testTTLCacheLogic() {
       name: 'Size limit',
       test: () => {
         cache.set('a', '1');
-        cache.set('b', '2'); 
+        cache.set('b', '2');
         cache.set('c', '3');
         const size1 = cache.size();
         cache.set('d', '4'); // Should evict oldest
@@ -197,34 +197,34 @@ function testTTLCacheLogic() {
       }
     }
   ];
-  
+
   let passed = 0;
   tests.forEach(test => {
     try {
       const result = test.test();
-      const status = result ? 'âœ…' : 'âŒ';
+      const status = result ? '' : '';
       console.log(`  ${status} ${test.name}: ${result ? 'PASSED' : 'FAILED'}`);
       if (result) passed++;
     } catch (error) {
-      console.log(`  âŒ ${test.name}: ERROR - ${error.message}`);
+      console.log(`   ${test.name}: ERROR - ${error.message}`);
     }
   });
-  
+
   console.log(`  Result: ${passed}/${tests.length} tests passed`);
   console.log('');
 }
 
 // Test input sanitization logic
 function testInputSanitization() {
-  console.log('ðŸ“¦ Testing Input Sanitization Logic...');
-  
+  console.log(' Testing Input Sanitization Logic...');
+
   function sanitizeString(input, maxLength = 1000) {
     if (typeof input !== 'string') return null;
-    
+
     const trimmed = input.trim();
     if (trimmed.length === 0) return null;
     if (trimmed.length > maxLength) return null;
-    
+
     // Remove control characters and normalize
     const sanitized = trimmed
       .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
@@ -233,21 +233,21 @@ function testInputSanitization() {
 
     return sanitized.length > 0 ? sanitized : null;
   }
-  
+
   function isValidTokenName(name) {
     if (!name || typeof name !== 'string') return false;
     const trimmed = name.trim();
     if (trimmed.length === 0 || trimmed.length > 32) return false;
     return /^[a-zA-Z0-9 ._-]+$/.test(trimmed);
   }
-  
+
   function isValidTokenSymbol(symbol) {
     if (!symbol || typeof symbol !== 'string') return false;
     const trimmed = symbol.trim();
     if (trimmed.length === 0 || trimmed.length > 10) return false;
     return /^[A-Z0-9]+$/.test(trimmed);
   }
-  
+
   const tests = [
     {
       name: 'String sanitization',
@@ -263,25 +263,25 @@ function testInputSanitization() {
       }
     },
     {
-      name: 'Valid token symbol', 
+      name: 'Valid token symbol',
       test: () => {
         return isValidTokenSymbol('BTC') && !isValidTokenSymbol('btc') && !isValidTokenSymbol('TEST@');
       }
     }
   ];
-  
+
   let passed = 0;
   tests.forEach(test => {
     try {
       const result = test.test();
-      const status = result ? 'âœ…' : 'âŒ';
+      const status = result ? '' : '';
       console.log(`  ${status} ${test.name}: ${result ? 'PASSED' : 'FAILED'}`);
       if (result) passed++;
     } catch (error) {
-      console.log(`  âŒ ${test.name}: ERROR - ${error.message}`);
+      console.log(`   ${test.name}: ERROR - ${error.message}`);
     }
   });
-  
+
   console.log(`  Result: ${passed}/${tests.length} tests passed`);
   console.log('');
 }
@@ -294,12 +294,12 @@ testInputSanitization();
 
 console.log('Manual validation tests completed!');
 console.log('');
-console.log('ðŸ“‹ Summary:');
-console.log('âœ… Base58 validation for Solana addresses working correctly');
-console.log('âœ… SSRF protection blocking dangerous URLs as expected'); 
-console.log('âœ… TTL cache operations functioning properly');
-console.log('âœ… Input sanitization removing control characters');
-console.log('âœ… Token validation enforcing proper formats');
+console.log(' Summary:');
+console.log(' Base58 validation for Solana addresses working correctly');
+console.log(' SSRF protection blocking dangerous URLs as expected');
+console.log(' TTL cache operations functioning properly');
+console.log(' Input sanitization removing control characters');
+console.log(' Token validation enforcing proper formats');
 console.log('');
-console.log('â„¹ï¸  These tests validate the core logic of the security implementations.');
-console.log('â„¹ï¸  Full TypeScript compilation and integration tests can be run with proper test framework.');
+console.log('  These tests validate the core logic of the security implementations.');
+console.log('  Full TypeScript compilation and integration tests can be run with proper test framework.');

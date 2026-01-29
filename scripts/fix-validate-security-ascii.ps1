@@ -1,4 +1,6 @@
-﻿$ErrorActionPreference = "Stop"
+param([string]$Path = "validate-security.js")
+
+$ErrorActionPreference = "Stop"
 
 function ReadUtf8([string]$p) { Get-Content -LiteralPath $p -Raw -Encoding UTF8 }
 function WriteUtf8NoBom([string]$p, [string]$content) {
@@ -7,29 +9,15 @@ function WriteUtf8NoBom([string]$p, [string]$content) {
   [System.IO.File]::WriteAllText((Resolve-Path $p).Path, $content, (New-Object System.Text.UTF8Encoding($false)))
 }
 
-$path = "validate-security.js"
-if (-not (Test-Path $path)) { throw "Arquivo não encontrado: $path" }
+if (-not (Test-Path $Path)) { throw "Arquivo nao encontrado: $Path" }
 
-$c = ReadUtf8 $path
+$c = ReadUtf8 $Path
 
-# troca emojis por ASCII (mantém o texto legível)
-$map = @(
-  @{ f="✅"; t="[OK]" },
-  @{ f="❌"; t="[FAIL]" },
-  @{ f="⚠️"; t="[WARN]" },
-  @{ f="ℹ️"; t="[i]" },
-  @{ f="ℹ";  t="[i]" },
-  @{ f="🧪"; t="" },
-  @{ f="📦"; t="" },
-  @{ f="📋"; t="" },
-  @{ f="🎉"; t="" }
-)
+# Remove QUALQUER caractere fora do ASCII imprimivel (mantem tab/newline/CR)
+$c2 = [regex]::Replace($c, '[^\x09\x0A\x0D\x20-\x7E]', '')
 
-foreach ($m in $map) { $c = $c.Replace($m.f, $m.t) }
+# limpa espacos extras que podem sobrar onde tinha emoji
+$c2 = [regex]::Replace($c2, '[ \t]+\n', "`n")
 
-# limpa mojibake comum (quando já foi impresso / copiado quebrado)
-$c = $c.Replace("ðŸ“¦","").Replace("ðŸ“‹","").Replace("ðŸŽ‰","")
-$c = $c.Replace("âœ…","[OK]").Replace("âŒ","[FAIL]").Replace("â„¹ï¸","[i]")
-
-WriteUtf8NoBom $path $c
-Write-Host "OK: validate-security.js agora está ASCII-safe" -ForegroundColor Green
+WriteUtf8NoBom $Path $c2
+Write-Host ("OK: stripped non-ASCII from " + $Path) -ForegroundColor Green
