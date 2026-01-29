@@ -40,3 +40,41 @@ next-env.d.ts
 .env*.bak*
 .vercel.bak-*
 .vercel.bak-*/
+
+# === SECURITY: local secrets & temp artifacts (do not commit) ===
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+.env
+!.env.example
+
+.tmp.*
+hs_err_pid*.log
+*.bak_*
+*.bak
+
+# Cursor/AI dump docs (keep only if sanitized)
+COMMIT_MESSAGE.md
+*_SUMMARY.md
+*_COMPLETE.md
+*_FINAL.md
+RESUMO_FINAL_*.md
+RELATORIO_*.md
+
+# === LOCAL WORKLOGS (Cursor/AI dumps) - do not commit ===
+/FIX*.md
+/FIXES*.md
+/PR_*.md
+/TEST_*.md
+/UI_*.md
+/DEV_*.md
+/RATE_LIMIT*.md
+/BUILD_FIX*.md
+/HYDRATION_*.md
+/INSPECAO_*.md
+/MONETIZATION_*.md
+/WEBACY_*.md
+/RELATORIO_*.md
+/RESUMO_*.md
