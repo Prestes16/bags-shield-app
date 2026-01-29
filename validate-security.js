@@ -1,9 +1,9 @@
-﻿/**
+/**
  * Simple validation tests for PR-A security implementations
  */
 
 // Test 1: Basic TypeScript compilation check
-console.log('ðŸ§ª Testing PR-A Security Implementations');
+console.log('Testing Security Implementations');
 console.log('');
 
 // Test Base58 validation logic
@@ -228,8 +228,9 @@ function testInputSanitization() {
     // Remove control characters and normalize
     const sanitized = trimmed
       .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      .normalize('NFKC');
-      
+      .normalize('NFKC')
+      .trim();
+
     return sanitized.length > 0 ? sanitized : null;
   }
   
@@ -291,7 +292,7 @@ testSSRFLogic();
 testTTLCacheLogic();
 testInputSanitization();
 
-console.log('ðŸŽ‰ Manual validation tests completed!');
+console.log('Manual validation tests completed!');
 console.log('');
 console.log('ðŸ“‹ Summary:');
 console.log('âœ… Base58 validation for Solana addresses working correctly');
