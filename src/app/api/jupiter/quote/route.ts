@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
         meta: {
           requestId,
           elapsedMs,
-          appFeeApplied: feeResolution.enabled,
+          appFeeApplied: feeResolution.enabled && !!feeResolution.feeWallet,
           appFeeBps: feeResolution.enabled && feeResolution.feeWallet ? feeResolution.platformFeeBps : undefined,
           ...(feeResolution.enabled === false && {
             appFeeReason: !flags.APP_FEE_ENABLED

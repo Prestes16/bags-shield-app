@@ -155,7 +155,6 @@ export async function POST(req: NextRequest) {
 
       }
 
-
     const swapRequest: JupiterSwapRequest = {
       quoteResponse,
       userPublicKey: publicKeyValidation.sanitized!,
